@@ -11,20 +11,26 @@ app = Flask(__name__)
 @app.route('/', methods=("GET", "POST"), strict_slashes=False)
 def home():
     fburl = request.args.get("url")
-    print("here", fburl)
+    # create regex parttern of this url  https://m.facebook.com/watch/?v=1068216013712168&ref=sharing
+    # https://m.facebook.com/watch/?v=1068216013712168&ref=sharing
+    # https://www.facebook.com/watch/?v=1068216013712168&ref=share
+    # https://www.facebook.com/watch/?v=1068216013712168&ref=share
 
     if fburl is None:
         return "No URL provided"
     if fburl == None:
         return "No URL", 500
-    if search(r"^https?://(www\.)?facebook\.com/", fburl) or search(r"fb.watch/([a-zA-Z0-9]+)/", fburl):
+    if search(r"^https?://(www\.)?facebook\.com/", fburl) or search(r"fb.watch/([a-zA-Z0-9]+)/", fburl) or search(r"^https?://(m\.)?facebook\.com/", fburl):
         pass
     else:
         return "Invalid Fb URL", 500
     if search(r"fb.watch/([a-zA-Z0-9]+)/", fburl):
-        site = requests.get("https://" + fburl)
-        print(site.url)
-        fburl = site.url
+        if fburl.startswith("https://"):
+            site = requests.get(fburl)
+            fburl = site.url
+        else:
+            site = requests.get("https://" + fburl)
+            fburl = site.url
 
     def xpartition(bigstr, sep1, sep2):
         x = bigstr.partition(sep1)
@@ -61,8 +67,7 @@ def home():
         vidurl = medialist[1].replace('\\', '')
     else:
         vidurl = medialist[5].replace('\\', '')
-    print(vidurl)
-    filename = xpartition(vidurl, '/', '?')
+    # filename = xpartition(vidurl, '/', '?')
     return {"url": vidurl}
 
 
@@ -87,5 +92,6 @@ def resolve_url(url):
     return (url, longurl)
 
 
+print(resolve_url('https://m.facebook.com/story.php?story_fbid=5004822856207850&id=100076447896070&m_entstream_source=video_home&player_suborigin=feed&player_format=permalink'))
 if __name__ == '__main__':
     app.run(debug=True)
