@@ -36,15 +36,20 @@ headers = {
 def home():
     fburl = request.args.get("url")
     print(fburl)
+    if fburl.__contains__("reel"):
+        spiltreels = fburl.split("/")[4]
+        fburl = 'https://www.facebook.com/' + spiltreels
+    else:
+        fburl = fburl
     payload = {"q": fburl}
     # create regex parttern of this url  https://m.facebook.com/watch/?v=1068216013712168&ref=sharing
     response = requests.request(
         "POST", url, json=payload, headers=headers).json()
     if response["code"] == 200:
         if response['resource'].__contains__('hd'):
-            return {"url": response['resource']['hd']}
+            return {"video": response['resource']['hd']}
         else:
-            return {"url": response['resource']['sd']}
+            return {"video": response['resource']['sd']}
     else:
         # https://m.facebook.com/watch/?v=1068216013712168&ref=sharing
         # https://www.facebook.com/watch/?v=1068216013712168&ref=share
@@ -102,7 +107,7 @@ def home():
         else:
             vidurl = medialist[5].replace('\\', '')
         # filename = xpartition(vidurl, '/', '?')
-        return {"url": vidurl}
+        return {"video": vidurl}
 
 
 # vidreq = urllib.request.Request(vidurl, headers={"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", "Accept-Language": "en-US,en;q=0.5", "DNT": "1", "Sec-Fetch-Dest": "document",
